@@ -1,3 +1,14 @@
+-- 0. Check for Required iFilters
+SET XACT_ABORT ON;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.fulltext_document_types WHERE document_type = '.pdf')
+   OR NOT EXISTS (SELECT 1 FROM sys.fulltext_document_types WHERE document_type = '.docx')
+BEGIN
+    THROW 50000, 'Required iFilters (.pdf, .docx) are missing. Please install them before proceeding.', 1;
+END
+GO
+
 -- 1. Create the Database
 CREATE DATABASE DocManagementDB;
 GO

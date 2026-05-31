@@ -23,13 +23,6 @@ namespace DocManagement
                     string fileName = Path.GetFileName(fileUploadControl.PostedFile.FileName);
                     string fileExtension = Path.GetExtension(fileName);
 
-                    // The Full-Text Engine expects extensions to typically not have the leading dot,
-                    // though some versions of SQL Server handle either. We will strip the dot for safety.
-                    if (fileExtension.StartsWith("."))
-                    {
-                        fileExtension = fileExtension.Substring(1);
-                    }
-
                     // A basic validation to ensure it's a file
                     if (string.IsNullOrEmpty(fileExtension))
                     {
