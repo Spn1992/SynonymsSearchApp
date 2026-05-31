@@ -42,54 +42,6 @@ namespace DocManagement
                         }
                     }
 
-                    // Validate binary signature matches extension
-                    bool isValidSignature = true;
-                    string extForValidation = fileExtension.ToLowerInvariant();
-                    if (extForValidation.StartsWith("."))
-                    {
-                        extForValidation = extForValidation.Substring(1);
-                    }
-                    
-                    if (extForValidation == "pdf")
-                    {
-                        // %PDF (25 50 44 46)
-                        if (fileData.Length < 4 || fileData[0] != 0x25 || fileData[1] != 0x50 || fileData[2] != 0x44 || fileData[3] != 0x46)
-                            isValidSignature = false;
-                    }
-                    else if (extForValidation == "docx")
-                    {
-                        // PK.. (50 4B 03 04)
-                        if (fileData.Length < 4 || fileData[0] != 0x50 || fileData[1] != 0x4B || fileData[2] != 0x03 || fileData[3] != 0x04)
-                            isValidSignature = false;
-                    }
-                    else if (extForValidation == "doc")
-                    {
-                        // D0 CF 11 E0 A1 B1 1A E1
-                        if (fileData.Length < 8 || fileData[0] != 0xD0 || fileData[1] != 0xCF || fileData[2] != 0x11 || fileData[3] != 0xE0 || 
-                            fileData[4] != 0xA1 || fileData[5] != 0xB1 || fileData[6] != 0x1A || fileData[7] != 0xE1)
-                            isValidSignature = false;
-                    }
-
-                    if (!isValidSignature)
-                    {
-                        lblMessage.ForeColor = System.Drawing.Color.Red;
-                        lblMessage.Text = "File signature does not match the extension.";
-                        return;
-                    }
-
-                    bool isSearchable = false;
-                    using (SqlConnection con = new SqlConnection(connectionString))
-                    {
-                        string checkQuery = "SELECT COUNT(*) FROM sys.fulltext_document_types WHERE document_type = @ext";
-                        using (SqlCommand checkCmd = new SqlCommand(checkQuery, con))
-                        {
-                            checkCmd.Parameters.AddWithValue("@ext", fileExtension);
-                            con.Open();
-                            int count = (int)checkCmd.ExecuteScalar();
-                            isSearchable = (count > 0);
-                        }
-                    }
-
                     // Insert the record into the database
                     using (SqlConnection con = new SqlConnection(connectionString))
                     {
