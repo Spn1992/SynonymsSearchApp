@@ -52,6 +52,7 @@ namespace DocManagement
             }
             catch (Exception ex)
             {
+                DiagnosticLogger.LogError("Error loading dashboard", ex);
                 lblError.Text = "Error loading dashboard: " + ex.Message;
             }
         }
@@ -229,6 +230,7 @@ namespace DocManagement
             }
             catch (Exception ex)
             {
+                DiagnosticLogger.LogError("Error reloading filters", ex);
                 lblError.Text = "Error reloading filters: " + ex.Message;
             }
         }
@@ -251,6 +253,7 @@ namespace DocManagement
             }
             catch (Exception ex)
             {
+                DiagnosticLogger.LogError("Error triggering full re-crawl", ex);
                 lblError.Text = "Error triggering full re-crawl: " + ex.Message;
             }
         }
@@ -287,6 +290,7 @@ namespace DocManagement
             }
             catch (Exception ex)
             {
+                DiagnosticLogger.LogError("Error triggering re-index for unindexed records", ex);
                 lblError.Text = "Error triggering re-index for unindexed records: " + ex.Message;
             }
         }

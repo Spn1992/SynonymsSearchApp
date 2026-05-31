@@ -30,6 +30,14 @@
             <asp:Label ID="lblMessage" runat="server" ForeColor="Green" Visible="false"></asp:Label>
 
             <div class="card">
+                <h3>Infrastructure Status</h3>
+                <p>SQL Full-Text Service (FDLauncher): <asp:Label ID="lblFdLauncherStatus" runat="server" Text="Checking..."></asp:Label></p>
+                <asp:Label ID="lblFdLauncherError" runat="server" CssClass="status-error" Visible="false"></asp:Label>
+                <br />
+                <asp:Button ID="btnSelfTest" runat="server" Text="Run End-to-End Self-Test" CssClass="btn" OnClick="btnSelfTest_Click" />
+            </div>
+
+            <div class="card">
                 <h3>Search Catalog Status</h3>
                 <p>Status: <asp:Label ID="lblCatalogStatus" runat="server" Text="Checking..."></asp:Label></p>
                 <p>Total Documents: <asp:Label ID="lblTotalDocs" runat="server" Text="0"></asp:Label></p>
@@ -54,6 +62,18 @@
                         <td><asp:Label ID="lblDocxStatus" runat="server" Text="Checking..."></asp:Label></td>
                     </tr>
                 </table>
+            </div>
+
+            <div class="card">
+                <h3>Diagnostic Logs</h3>
+                <asp:GridView ID="gvDiagnosticLogs" runat="server" AutoGenerateColumns="False" Width="100%" CssClass="table" EmptyDataText="No diagnostic logs available.">
+                    <Columns>
+                        <asp:BoundField DataField="LogTime" HeaderText="Time" />
+                        <asp:BoundField DataField="LogLevel" HeaderText="Level" />
+                        <asp:BoundField DataField="Message" HeaderText="Message" />
+                        <asp:BoundField DataField="ExceptionDetails" HeaderText="Details" />
+                    </Columns>
+                </asp:GridView>
             </div>
         </div>
     </form>

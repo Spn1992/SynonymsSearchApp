@@ -101,6 +101,7 @@ namespace DocManagement
                 }
                 catch (Exception ex)
                 {
+                    DiagnosticLogger.LogError("Error uploading file", ex);
                     lblMessage.ForeColor = System.Drawing.Color.Red;
                     lblMessage.Text = "Error uploading file: " + ex.Message;
                 }

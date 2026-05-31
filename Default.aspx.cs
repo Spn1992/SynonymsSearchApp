@@ -59,6 +59,7 @@ namespace DocManagement
             }
             catch (Exception ex)
             {
+                DiagnosticLogger.LogError("Error loading documents (BindGrid)", ex);
                 lblMessage.Text = "Error loading documents: " + ex.Message;
             }
         }
@@ -83,6 +84,7 @@ namespace DocManagement
             }
             catch (Exception ex)
             {
+                DiagnosticLogger.LogError("Error deleting document", ex);
                 lblMessage.Text = "Error deleting document: " + ex.Message;
             }
         }
@@ -107,10 +109,12 @@ namespace DocManagement
             }
             catch (AggregateException ex)
             {
-                 lblMessage.Text = "Error during search: " + ex.InnerExceptions.FirstOrDefault()?.Message;
+                DiagnosticLogger.LogError("AggregateException during search", ex);
+                lblMessage.Text = "Error during search: " + ex.InnerExceptions.FirstOrDefault()?.Message;
             }
             catch (Exception ex)
             {
+                DiagnosticLogger.LogError("Exception during search", ex);
                 lblMessage.Text = "Error during search: " + ex.Message;
             }
         }
@@ -156,8 +160,9 @@ namespace DocManagement
                             }
                         }
                     }
-                    catch
+                    catch (Exception apiEx)
                     {
+                        DiagnosticLogger.LogError($"Synonym retrieval failed for token: {token}", apiEx);
                         // If API fails, we just continue with the original token
                     }
 

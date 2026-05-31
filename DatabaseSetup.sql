@@ -62,3 +62,13 @@ BEGIN
 END;
 GO
 
+-- 6. Create Diagnostic Logs Table
+CREATE TABLE DiagnosticLogs
+(
+    LogId INT IDENTITY(1,1) PRIMARY KEY,
+    LogTime DATETIME DEFAULT GETDATE(),
+    LogLevel NVARCHAR(50),
+    Message NVARCHAR(MAX),
+    ExceptionDetails NVARCHAR(MAX)
+);
+GO
