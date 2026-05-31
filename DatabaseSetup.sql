@@ -1,3 +1,12 @@
+-- 0. Verify required iFilters are present
+IF NOT EXISTS (SELECT 1 FROM sys.fulltext_document_types WHERE document_type = '.pdf')
+   OR NOT EXISTS (SELECT 1 FROM sys.fulltext_document_types WHERE document_type = '.docx')
+BEGIN
+    RAISERROR ('Required Full-Text Search iFilters (.pdf, .docx) are missing on this server. Setup aborted.', 16, 1);
+    SET NOEXEC ON;
+END
+GO
+
 -- 1. Create the Database
 CREATE DATABASE DocManagementDB;
 GO
@@ -18,28 +27,8 @@ CREATE TABLE Documents
 );
 GO
 
--- 3. Create a Full-Text Catalog
-CREATE FULLTEXT CATALOG DocCatalog AS DEFAULT;
-GO
-
--- 4. Create a Full-Text Index
--- The TYPE COLUMN allows the full-text engine to know how to parse the VARBINARY(MAX) data
--- (e.g., .txt, .pdf, .docx).
-CREATE FULLTEXT INDEX ON Documents
-(
-    FileName Language 1033,
-    FileData TYPE COLUMN FileExtension Language 1033
-)
-KEY INDEX PK_Documents
-ON DocCatalog
-WITH CHANGE_TRACKING AUTO;
-GO
-
--- 5. Trigger for Normalizing File Extensions
-CREATE TRIGGER trg_NormalizeFileExtension
-ON Documents
-AFTER INSERT, UPDATE
-AS
+-- Check if Full-Text Search is installed
+IF SERVERPROPERTY('IsFullTextInstalled') = 1
 BEGIN
     SET NOCOUNT ON;
 
@@ -61,4 +50,3 @@ BEGIN
                         END);
 END;
 GO
-
