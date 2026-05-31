@@ -62,3 +62,18 @@ BEGIN
 END;
 GO
 
+
+-- 6. Audit Logs Table
+CREATE TABLE AuditLogs
+(
+    LogId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    LogDate DATETIME NOT NULL DEFAULT GETDATE(),
+    FileName NVARCHAR(255) NULL,
+    Status NVARCHAR(50) NOT NULL,
+    ErrorMessage NVARCHAR(MAX) NULL
+);
+GO
+
+-- 7. Audit Log Index for Retention Policy
+CREATE NONCLUSTERED INDEX IX_AuditLogs_LogDate ON AuditLogs(LogDate);
+GO

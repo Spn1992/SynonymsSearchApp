@@ -108,10 +108,12 @@ namespace DocManagement
             catch (AggregateException ex)
             {
                  lblMessage.Text = "Error during search: " + ex.InnerExceptions.FirstOrDefault()?.Message;
+                 Audit.LogAudit(searchTerm, "Error", "Exception during search: " + ex.InnerExceptions.FirstOrDefault()?.Message);
             }
             catch (Exception ex)
             {
                 lblMessage.Text = "Error during search: " + ex.Message;
+                Audit.LogAudit(searchTerm, "Error", "Exception during search: " + ex.Message);
             }
         }
 
@@ -156,10 +158,13 @@ namespace DocManagement
                             }
                         }
                     }
-                    catch
-                    {
-                        // If API fails, we just continue with the original token
-                    }
+                }
+                catch (Exception ex)
+                {
+                    // If API fails, we just continue with the original search term
+                    Audit.LogAudit(searchTerm, "Warning", "Datamuse API error (synonyms unavailable): " + ex.Message);
+                }
+            }
 
                     // 2. Construct SQL Full-Text Search query string using OR and FORMSOF for each token's synonyms
                     var orConditions = new List<string>();
