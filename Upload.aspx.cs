@@ -45,6 +45,11 @@ namespace DocManagement
                     // Validate binary signature matches extension
                     bool isValidSignature = true;
                     string extForValidation = fileExtension.ToLowerInvariant();
+                    if (extForValidation.StartsWith("."))
+                    {
+                        extForValidation = extForValidation.Substring(1);
+                    }
+                    
                     if (extForValidation == "pdf")
                     {
                         // %PDF (25 50 44 46)
