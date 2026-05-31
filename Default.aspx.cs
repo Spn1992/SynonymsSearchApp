@@ -123,55 +123,61 @@ namespace DocManagement
 
         private async Task<string> PerformSearchAsync(string searchTerm)
         {
-            // 1. Fetch synonyms from Datamuse API
-            List<string> searchTerms = new List<string> { searchTerm };
-
-            // Clean up the search term (just take the first word for synonym searching to keep it simple, or process whole phrase if needed)
-            string firstWord = searchTerm.Split(' ').FirstOrDefault() ?? searchTerm;
-
-            string apiUrl = $"https://api.datamuse.com/words?rel_syn={Uri.EscapeDataString(firstWord)}&max=5"; // limit to top 5 synonyms
-
+            // 1. Tokenize the search term to avoid multi-word phrases causing SQL errors
+            string[] tokens = searchTerm.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            
             using (HttpClient client = new HttpClient())
             {
-                try
+                var fetchTasks = tokens.Select(async token =>
                 {
-                    HttpResponseMessage response = await client.GetAsync(apiUrl);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string jsonResponse = await response.Content.ReadAsStringAsync();
-                        JavaScriptSerializer js = new JavaScriptSerializer();
-                        var synonymsData = js.Deserialize<List<DatamuseWord>>(jsonResponse);
+                    List<string> searchTerms = new List<string> { token };
+                    string apiUrl = $"https://api.datamuse.com/words?rel_syn={Uri.EscapeDataString(token)}&max=5";
 
-                        if (synonymsData != null)
+                    try
+                    {
+                        HttpResponseMessage response = await client.GetAsync(apiUrl);
+                        if (response.IsSuccessStatusCode)
                         {
-                            foreach (var item in synonymsData)
+                            string jsonResponse = await response.Content.ReadAsStringAsync();
+                            JavaScriptSerializer js = new JavaScriptSerializer();
+                            var synonymsData = js.Deserialize<List<DatamuseWord>>(jsonResponse);
+
+                            if (synonymsData != null)
                             {
-                                if (!string.IsNullOrEmpty(item.word) && !searchTerms.Contains(item.word, StringComparer.OrdinalIgnoreCase))
+                                foreach (var item in synonymsData)
                                 {
-                                    searchTerms.Add(item.word);
+                                    if (!string.IsNullOrEmpty(item.word) && 
+                                        !item.word.Contains(" ") && 
+                                        !searchTerms.Contains(item.word, StringComparer.OrdinalIgnoreCase))
+                                    {
+                                        searchTerms.Add(item.word);
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                catch
-                {
-                    // If API fails, we just continue with the original search term
-                }
+                    catch
+                    {
+                        // If API fails, we just continue with the original token
+                    }
+
+                    // 2. Construct SQL Full-Text Search query string using OR and FORMSOF for each token's synonyms
+                    var orConditions = new List<string>();
+                    foreach(var term in searchTerms)
+                    {
+                        string cleanTerm = term.Replace("\"", "\"\"");
+                        orConditions.Add($"FORMSOF(INFLECTIONAL, \"{cleanTerm}\")");
+                    }
+
+                    return orConditions.Count > 0 ? "(" + string.Join(" OR ", orConditions) + ")" : string.Empty;
+                }).ToList();
+
+                var conditionsArray = await Task.WhenAll(fetchTasks);
+                var andConditions = conditionsArray.Where(c => !string.IsNullOrEmpty(c)).ToList();
+
+                // Combine each token's clauses with AND to ensure all query tokens are present
+                return string.Join(" AND ", andConditions);
             }
-
-            // 2. Construct SQL Full-Text Search query string using OR and FORMSOF
-            // Example: FORMSOF(INFLECTIONAL, "term1") OR FORMSOF(INFLECTIONAL, "synonym1")
-
-            var conditions = new List<string>();
-            foreach(var term in searchTerms)
-            {
-                // Escape double quotes in the term if necessary, though typical words won't have them
-                string cleanTerm = term.Replace("\"", "\"\"");
-                conditions.Add($"FORMSOF(INFLECTIONAL, \"{cleanTerm}\")");
-            }
-
-            return string.Join(" OR ", conditions);
         }
 
         // Helper class for deserializing Datamuse JSON response
