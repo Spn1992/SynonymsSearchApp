@@ -36,6 +36,42 @@ namespace DocManagement
                 {
                     con.Open();
 
+                    // 0. OS Resource Loading Diagnostic
+                    try
+                    {
+                        string osResourceQuery = "SELECT FULLTEXTSERVICEPROPERTY('LoadOSResources') AS LoadOSResources;";
+                        using (SqlCommand cmd = new SqlCommand(osResourceQuery, con))
+                        {
+                            object result = cmd.ExecuteScalar();
+                            if (result != DBNull.Value && result != null)
+                            {
+                                int isLoaded = Convert.ToInt32(result);
+                                if (isLoaded == 1)
+                                {
+                                    pnlSystemHealthy.Visible = true;
+                                    pnlBinaryWarning.Visible = false;
+                                }
+                                else
+                                {
+                                    pnlSystemHealthy.Visible = false;
+                                    pnlBinaryWarning.Visible = true;
+                                }
+                            }
+                            else
+                            {
+                                // If null, assume missing/disabled
+                                pnlSystemHealthy.Visible = false;
+                                pnlBinaryWarning.Visible = true;
+                            }
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // Gracefully handle permission errors
+                        pnlSystemHealthy.Visible = false;
+                        pnlBinaryWarning.Visible = true; // Safe fallback assumption for diagnostic
+                    }
+
                     // 1. Catalog Status and Counts
                     string catalogQuery = @"
                         DECLARE @PopulateStatus INT = FULLTEXTCATALOGPROPERTY('DocCatalog', 'PopulateStatus');

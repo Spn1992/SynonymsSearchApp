@@ -9,6 +9,10 @@ namespace DocManagement {
         
         protected global::System.Web.UI.WebControls.Label lblMessage;
         
+        protected global::System.Web.UI.WebControls.Panel pnlSystemHealthy;
+        
+        protected global::System.Web.UI.WebControls.Panel pnlBinaryWarning;
+        
         protected global::System.Web.UI.WebControls.Label lblCatalogStatus;
         
         protected global::System.Web.UI.WebControls.Label lblTotalDocs;
