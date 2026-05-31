@@ -43,11 +43,22 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    IF TRIGGER_NESTLEVEL() > 1
+        RETURN;
+
     UPDATE d
-    SET FileExtension = '.' + ltrim(rtrim(i.FileExtension))
+    SET FileExtension = CASE 
+                            WHEN left(ltrim(rtrim(i.FileExtension)), 1) = '.' 
+                            THEN ltrim(rtrim(i.FileExtension))
+                            ELSE '.' + ltrim(rtrim(i.FileExtension))
+                        END
     FROM Documents d
     INNER JOIN inserted i ON d.RecordId = i.RecordId
-    WHERE left(ltrim(rtrim(i.FileExtension)), 1) <> '.';
+    WHERE d.FileExtension <> CASE 
+                            WHEN left(ltrim(rtrim(i.FileExtension)), 1) = '.' 
+                            THEN ltrim(rtrim(i.FileExtension))
+                            ELSE '.' + ltrim(rtrim(i.FileExtension))
+                        END;
 END;
 GO
 

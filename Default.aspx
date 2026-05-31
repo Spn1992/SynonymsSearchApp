@@ -23,7 +23,10 @@
         <div class="container">
             <div class="header">
                 <h2>Document Management</h2>
-                <a href="Upload.aspx" class="btn">Upload New Document</a>
+                <div>
+                    <a href="Upload.aspx" class="btn">Upload New Document</a>
+                    <a href="IndexManager.aspx" class="btn" style="background-color: #28a745;">Index Manager</a>
+                </div>
             </div>
 
             <div class="search-bar">

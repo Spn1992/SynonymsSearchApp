@@ -89,6 +89,13 @@
     <Compile Include="Health.aspx.designer.cs">
       <DependentUpon>Health.aspx</DependentUpon>
     </Compile>
+    <Compile Include="IndexManager.aspx.cs">
+      <DependentUpon>IndexManager.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="IndexManager.aspx.designer.cs">
+      <DependentUpon>IndexManager.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Upload.aspx.cs">
       <DependentUpon>Upload.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
