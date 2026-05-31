@@ -26,6 +26,7 @@
                 <div>
                     <a href="Upload.aspx" class="btn">Upload New Document</a>
                     <a href="IndexManager.aspx" class="btn" style="background-color: #28a745;">Index Manager</a>
+                    <a href="Status.aspx" class="btn" style="background-color: #17a2b8;">Search Integrity</a>
                 </div>
             </div>
 

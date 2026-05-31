@@ -63,6 +63,7 @@
   <ItemGroup>
     <Content Include="Default.aspx" />
     <Content Include="Health.aspx" />
+    <Content Include="Status.aspx" />
     <Content Include="IndexManager.aspx" />
     <Content Include="Upload.aspx" />
     <Content Include="Web.config" />
@@ -81,6 +82,13 @@
     </Compile>
     <Compile Include="Health.aspx.designer.cs">
       <DependentUpon>Health.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Status.aspx.cs">
+      <DependentUpon>Status.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Status.aspx.designer.cs">
+      <DependentUpon>Status.aspx</DependentUpon>
     </Compile>
     <Compile Include="IndexManager.aspx.cs">
       <DependentUpon>IndexManager.aspx</DependentUpon>
