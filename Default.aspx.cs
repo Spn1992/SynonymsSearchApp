@@ -171,24 +171,15 @@ namespace DocManagement
                             // If API fails, we just continue with the original token
                         }
                     }
-
-                    // 2. Construct SQL Full-Text Search query string using OR and FORMSOF for each token's synonyms
-                    var orConditions = new List<string>();
-                    foreach(var term in searchTerms)
+                    else
                     {
                         // Clean quotes in case they bypass sanitization or are added later
                         string cleanTerm = term.Replace("\"", "\"\"");
                         orConditions.Add($"FORMSOF(INFLECTIONAL, \"{cleanTerm}\")");
                     }
+                }
 
-                    return orConditions.Count > 0 ? "(" + string.Join(" OR ", orConditions) + ")" : string.Empty;
-                }).ToList();
-
-                var conditionsArray = await Task.WhenAll(fetchTasks);
-                var andConditions = conditionsArray.Where(c => !string.IsNullOrEmpty(c)).ToList();
-
-                // Combine each token's clauses with AND to ensure all query tokens are present
-                return string.Join(" AND ", andConditions);
+                return orConditions.Count > 0 ? "(" + string.Join(" OR ", orConditions) + ")" : string.Empty;
             }
         }
 
