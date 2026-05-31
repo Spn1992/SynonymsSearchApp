@@ -62,7 +62,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Default.aspx" />
-    <Content Include="Health.aspx" />
     <Content Include="Upload.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
@@ -73,13 +72,6 @@
     </Compile>
     <Compile Include="Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Health.aspx.cs">
-      <DependentUpon>Health.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Health.aspx.designer.cs">
-      <DependentUpon>Health.aspx</DependentUpon>
     </Compile>
     <Compile Include="Upload.aspx.cs">
       <DependentUpon>Upload.aspx</DependentUpon>
