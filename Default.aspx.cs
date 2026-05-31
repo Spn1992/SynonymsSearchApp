@@ -123,48 +123,60 @@ namespace DocManagement
 
         private async Task<string> PerformSearchAsync(string searchTerm)
         {
+            // Sanitize input to prevent special characters from breaking the search syntax
+            // Replace non-alphanumeric characters with spaces to allow proper tokenization
+            string sanitized = new string(searchTerm.Select(c => char.IsLetterOrDigit(c) ? c : ' ').ToArray());
+
             // 1. Tokenize the search term to avoid multi-word phrases causing SQL errors
-            string[] tokens = searchTerm.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] tokens = sanitized.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             
+            if (tokens.Length == 0) return string.Empty;
+
             using (HttpClient client = new HttpClient())
             {
-                var fetchTasks = tokens.Select(async token =>
+                var fetchTasks = tokens.Select(async (token, index) =>
                 {
                     List<string> searchTerms = new List<string> { token };
-                    string apiUrl = $"https://api.datamuse.com/words?rel_syn={Uri.EscapeDataString(token)}&max=5";
-
-                    try
+                    
+                    // Restrict synonym lookup to the first word to improve performance
+                    if (index == 0)
                     {
-                        HttpResponseMessage response = await client.GetAsync(apiUrl);
-                        if (response.IsSuccessStatusCode)
-                        {
-                            string jsonResponse = await response.Content.ReadAsStringAsync();
-                            JavaScriptSerializer js = new JavaScriptSerializer();
-                            var synonymsData = js.Deserialize<List<DatamuseWord>>(jsonResponse);
+                        string apiUrl = $"https://api.datamuse.com/words?rel_syn={Uri.EscapeDataString(token)}&max=5";
 
-                            if (synonymsData != null)
+                        try
+                        {
+                            HttpResponseMessage response = await client.GetAsync(apiUrl);
+                            if (response.IsSuccessStatusCode)
                             {
-                                foreach (var item in synonymsData)
+                                string jsonResponse = await response.Content.ReadAsStringAsync();
+                                JavaScriptSerializer js = new JavaScriptSerializer();
+                                var synonymsData = js.Deserialize<List<DatamuseWord>>(jsonResponse);
+
+                                if (synonymsData != null)
                                 {
-                                    if (!string.IsNullOrEmpty(item.word) && 
-                                        !item.word.Contains(" ") && 
-                                        !searchTerms.Contains(item.word, StringComparer.OrdinalIgnoreCase))
+                                    foreach (var item in synonymsData)
                                     {
-                                        searchTerms.Add(item.word);
+                                        if (!string.IsNullOrEmpty(item.word) && 
+                                            !item.word.Contains(" ") && 
+                                            !searchTerms.Contains(item.word, StringComparer.OrdinalIgnoreCase))
+                                        {
+                                            searchTerms.Add(item.word);
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                    catch
-                    {
-                        // If API fails, we just continue with the original token
+                        catch
+                        {
+                            // If API fails, we just continue with the original token
+                        }
                     }
 
                     // 2. Construct SQL Full-Text Search query string using OR and FORMSOF for each token's synonyms
                     var orConditions = new List<string>();
                     foreach(var term in searchTerms)
                     {
+                        // Clean quotes in case they bypass sanitization or are added later
                         string cleanTerm = term.Replace("\"", "\"\"");
                         orConditions.Add($"FORMSOF(INFLECTIONAL, \"{cleanTerm}\")");
                     }
