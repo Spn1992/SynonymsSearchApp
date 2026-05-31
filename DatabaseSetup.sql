@@ -47,18 +47,18 @@ BEGIN
         RETURN;
 
     UPDATE d
-    SET FileExtension = CASE 
+    SET FileExtension = LOWER(CASE 
                             WHEN left(ltrim(rtrim(i.FileExtension)), 1) = '.' 
                             THEN ltrim(rtrim(i.FileExtension))
                             ELSE '.' + ltrim(rtrim(i.FileExtension))
-                        END
+                        END)
     FROM Documents d
     INNER JOIN inserted i ON d.RecordId = i.RecordId
-    WHERE d.FileExtension <> CASE 
+    WHERE d.FileExtension <> LOWER(CASE 
                             WHEN left(ltrim(rtrim(i.FileExtension)), 1) = '.' 
                             THEN ltrim(rtrim(i.FileExtension))
                             ELSE '.' + ltrim(rtrim(i.FileExtension))
-                        END;
+                        END);
 END;
 GO
 

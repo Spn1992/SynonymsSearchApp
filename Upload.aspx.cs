@@ -21,7 +21,7 @@ namespace DocManagement
                 try
                 {
                     string fileName = Path.GetFileName(fileUploadControl.PostedFile.FileName);
-                    string fileExtension = Path.GetExtension(fileName);
+                    string fileExtension = Path.GetExtension(fileName).ToLowerInvariant();
 
                     // Preserve the leading dot as required by the Full-Text Engine for proper indexing.
                     // Removed the code that strips the leading dot.

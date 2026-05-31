@@ -1,18 +1,18 @@
 USE DocManagementDB;
 GO
 
--- 1. Correct legacy data: add leading dot and remove whitespace
+-- 1. Correct legacy data: add leading dot, remove whitespace, and standardize to lowercase
 UPDATE Documents
-SET FileExtension = CASE 
+SET FileExtension = LOWER(CASE 
                         WHEN left(ltrim(rtrim(FileExtension)), 1) = '.' 
                         THEN ltrim(rtrim(FileExtension))
                         ELSE '.' + ltrim(rtrim(FileExtension))
-                    END
-WHERE FileExtension <> CASE 
+                    END)
+WHERE FileExtension <> LOWER(CASE 
                         WHEN left(ltrim(rtrim(FileExtension)), 1) = '.' 
                         THEN ltrim(rtrim(FileExtension))
                         ELSE '.' + ltrim(rtrim(FileExtension))
-                    END;
+                    END);
 GO
 
 -- 2. Trigger a refresh of the full-text index to ensure content becomes discoverable
