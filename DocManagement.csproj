@@ -92,6 +92,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="DatabaseSetup.sql" />
+    <None Include="DataCorrection.sql" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
