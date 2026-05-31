@@ -27,21 +27,34 @@ CREATE TABLE Documents
 );
 GO
 
--- 3. Create a Full-Text Catalog
-CREATE FULLTEXT CATALOG DocCatalog AS DEFAULT;
-GO
+-- Check if Full-Text Search is installed
+IF SERVERPROPERTY('IsFullTextInstalled') = 1
+BEGIN
+    -- 3. Create a Full-Text Catalog
+    EXEC('CREATE FULLTEXT CATALOG DocCatalog AS DEFAULT');
 
--- 4. Create a Full-Text Index
--- The TYPE COLUMN allows the full-text engine to know how to parse the VARBINARY(MAX) data
--- (e.g., .txt, .pdf, .docx).
-CREATE FULLTEXT INDEX ON Documents
-(
-    FileName Language 1033,
-    FileData TYPE COLUMN FileExtension Language 1033
-)
-KEY INDEX PK_Documents
-ON DocCatalog
-WITH CHANGE_TRACKING AUTO;
+    -- 4. Create a Full-Text Index
+    -- The TYPE COLUMN allows the full-text engine to know how to parse the VARBINARY(MAX) data
+    -- (e.g., .txt, .pdf, .docx).
+    EXEC('CREATE FULLTEXT INDEX ON Documents
+    (
+        FileName Language 1033,
+        FileData TYPE COLUMN FileExtension Language 1033
+    )
+    KEY INDEX PK_Documents
+    ON DocCatalog
+    WITH CHANGE_TRACKING AUTO');
+
+    -- Confirm existence of catalog before applying service-level configurations
+    IF EXISTS (SELECT 1 FROM sys.fulltext_catalogs WHERE name = 'DocCatalog')
+    BEGIN
+        EXEC sp_fulltext_service 'load_os_resources', 1;
+    END
+END
+ELSE
+BEGIN
+    PRINT 'WARNING: Full-Text Search components are not installed on this SQL Server instance. Document content indexing will be skipped.';
+END
 GO
 
 -- 5. Trigger for Normalizing File Extensions
