@@ -29,6 +29,21 @@
             <asp:Label ID="lblError" runat="server" CssClass="status-error" Visible="false"></asp:Label>
             <asp:Label ID="lblMessage" runat="server" ForeColor="Green" Visible="false"></asp:Label>
 
+            <asp:Panel ID="pnlSystemHealthy" runat="server" Visible="false" CssClass="card" BackColor="#ddffdd" BorderColor="Green">
+                <h3 style="color: green; margin-top: 0;">System Healthy</h3>
+                <p>Binary content indexing is active and correctly configured. The system is correctly configured to index both file names and internal binary content like PDFs.</p>
+            </asp:Panel>
+
+            <asp:Panel ID="pnlBinaryWarning" runat="server" Visible="false" CssClass="card" BackColor="#ffdddd" BorderColor="Red">
+                <h3 style="color: red; margin-top: 0;">Search Warning: Binary content indexing is disabled</h3>
+                <p>Search within file contents is currently inactive. The SQL Filter Daemon cannot parse documents because OS resource loading is disabled.</p>
+                <h4>How to Fix:</h4>
+                <p>Execute the following SQL commands and restart the filter daemon host process to resolve the issue:</p>
+                <pre style="background: #fff; padding: 10px; border: 1px solid #ccc; overflow-x: auto;">EXEC sp_fulltext_service 'load_os_resources', 1;
+EXEC sp_fulltext_service 'restart_all_fdhosts';</pre>
+                <p><em>Note: You may need DBA privileges to execute these commands.</em></p>
+            </asp:Panel>
+
             <div class="card">
                 <h3>Search Catalog Status</h3>
                 <p>Status: <asp:Label ID="lblCatalogStatus" runat="server" Text="Checking..."></asp:Label></p>

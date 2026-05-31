@@ -1,11 +1,17 @@
--- 1. Create the Database
+-- 1. Configure Full-Text Search to load OS resources (Required for binary file indexing)
+EXEC sp_fulltext_service 'load_os_resources', 1;
+-- Restart the Filter Daemon Host processes to apply the changes
+EXEC sp_fulltext_service 'restart_all_fdhosts';
+GO
+
+-- 2. Create the Database
 CREATE DATABASE DocManagementDB;
 GO
 
 USE DocManagementDB;
 GO
 
--- 2. Create the Documents Table
+-- 3. Create the Documents Table
 -- Note: A FileExtension column is required to full-text index a VARBINARY(MAX) column.
 CREATE TABLE Documents
 (
@@ -18,11 +24,11 @@ CREATE TABLE Documents
 );
 GO
 
--- 3. Create a Full-Text Catalog
+-- 4. Create a Full-Text Catalog
 CREATE FULLTEXT CATALOG DocCatalog AS DEFAULT;
 GO
 
--- 4. Create a Full-Text Index
+-- 5. Create a Full-Text Index
 -- The TYPE COLUMN allows the full-text engine to know how to parse the VARBINARY(MAX) data
 -- (e.g., .txt, .pdf, .docx).
 CREATE FULLTEXT INDEX ON Documents
@@ -35,7 +41,7 @@ ON DocCatalog
 WITH CHANGE_TRACKING AUTO;
 GO
 
--- 5. Trigger for Normalizing File Extensions
+-- 6. Trigger for Normalizing File Extensions
 CREATE TRIGGER trg_NormalizeFileExtension
 ON Documents
 AFTER INSERT, UPDATE
