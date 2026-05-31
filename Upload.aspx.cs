@@ -77,6 +77,19 @@ namespace DocManagement
                         return;
                     }
 
+                    bool isSearchable = false;
+                    using (SqlConnection con = new SqlConnection(connectionString))
+                    {
+                        string checkQuery = "SELECT COUNT(*) FROM sys.fulltext_document_types WHERE document_type = @ext";
+                        using (SqlCommand checkCmd = new SqlCommand(checkQuery, con))
+                        {
+                            checkCmd.Parameters.AddWithValue("@ext", fileExtension);
+                            con.Open();
+                            int count = (int)checkCmd.ExecuteScalar();
+                            isSearchable = (count > 0);
+                        }
+                    }
+
                     // Insert the record into the database
                     using (SqlConnection con = new SqlConnection(connectionString))
                     {
@@ -96,8 +109,16 @@ namespace DocManagement
                         }
                     }
 
-                    lblMessage.ForeColor = System.Drawing.Color.Green;
-                    lblMessage.Text = "File uploaded successfully!";
+                    if (isSearchable)
+                    {
+                        lblMessage.ForeColor = System.Drawing.Color.Green;
+                        lblMessage.Text = "File uploaded successfully!";
+                    }
+                    else
+                    {
+                        lblMessage.ForeColor = System.Drawing.Color.DarkOrange;
+                        lblMessage.Text = "File uploaded successfully! Content search is unavailable for this file type.";
+                    }
                 }
                 catch (Exception ex)
                 {
