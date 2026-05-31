@@ -63,10 +63,18 @@
   <ItemGroup>
     <Content Include="Default.aspx" />
     <Content Include="Health.aspx" />
+    <Content Include="Audit.aspx" />
     <Content Include="Upload.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Audit.aspx.cs">
+      <DependentUpon>Audit.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Audit.aspx.designer.cs">
+      <DependentUpon>Audit.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -93,6 +101,7 @@
   <ItemGroup>
     <None Include="DatabaseSetup.sql" />
     <None Include="DataCorrection.sql" />
+    <None Include="Deploy.ps1" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

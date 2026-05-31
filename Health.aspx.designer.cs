@@ -22,5 +22,9 @@ namespace DocManagement {
         protected global::System.Web.UI.WebControls.Label lblPdfStatus;
         
         protected global::System.Web.UI.WebControls.Label lblDocxStatus;
+
+        protected global::System.Web.UI.WebControls.Label lblServiceStatus;
+        
+        protected global::System.Web.UI.WebControls.Label lblTempDirStatus;
     }
 }

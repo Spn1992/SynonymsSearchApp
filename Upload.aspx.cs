@@ -45,19 +45,19 @@ namespace DocManagement
                     // Validate binary signature matches extension
                     bool isValidSignature = true;
                     string extForValidation = fileExtension.ToLowerInvariant();
-                    if (extForValidation == "pdf")
+                    if (extForValidation == ".pdf")
                     {
                         // %PDF (25 50 44 46)
                         if (fileData.Length < 4 || fileData[0] != 0x25 || fileData[1] != 0x50 || fileData[2] != 0x44 || fileData[3] != 0x46)
                             isValidSignature = false;
                     }
-                    else if (extForValidation == "docx")
+                    else if (extForValidation == ".docx")
                     {
                         // PK.. (50 4B 03 04)
                         if (fileData.Length < 4 || fileData[0] != 0x50 || fileData[1] != 0x4B || fileData[2] != 0x03 || fileData[3] != 0x04)
                             isValidSignature = false;
                     }
-                    else if (extForValidation == "doc")
+                    else if (extForValidation == ".doc")
                     {
                         // D0 CF 11 E0 A1 B1 1A E1
                         if (fileData.Length < 8 || fileData[0] != 0xD0 || fileData[1] != 0xCF || fileData[2] != 0x11 || fileData[3] != 0xE0 || 
@@ -69,7 +69,26 @@ namespace DocManagement
                     {
                         lblMessage.ForeColor = System.Drawing.Color.Red;
                         lblMessage.Text = "File signature does not match the extension.";
+                        Audit.LogAudit(fileName, "Error", "File signature does not match the extension.");
                         return;
+                    }
+
+                    // Check if file type handler exists
+                    bool hasHandler = false;
+                    using (SqlConnection con = new SqlConnection(connectionString))
+                    {
+                        string checkQuery = "SELECT COUNT(*) FROM sys.fulltext_document_types WHERE document_type = @ext";
+                        using (SqlCommand cmd = new SqlCommand(checkQuery, con))
+                        {
+                            cmd.Parameters.AddWithValue("@ext", fileExtension.ToLowerInvariant());
+                            con.Open();
+                            hasHandler = (int)cmd.ExecuteScalar() > 0;
+                        }
+                    }
+
+                    if (!hasHandler)
+                    {
+                        Audit.LogAudit(fileName, "Error", "Binary extraction failed due to a missing file-type handler.");
                     }
 
                     // Insert the record into the database
@@ -91,6 +110,11 @@ namespace DocManagement
                         }
                     }
 
+                    if (hasHandler)
+                    {
+                        Audit.LogAudit(fileName, "Success", "File uploaded and queued for indexing.");
+                    }
+
                     lblMessage.ForeColor = System.Drawing.Color.Green;
                     lblMessage.Text = "File uploaded successfully!";
                 }
@@ -98,6 +122,7 @@ namespace DocManagement
                 {
                     lblMessage.ForeColor = System.Drawing.Color.Red;
                     lblMessage.Text = "Error uploading file: " + ex.Message;
+                    Audit.LogAudit(fileUploadControl.HasFile ? Path.GetFileName(fileUploadControl.PostedFile.FileName) : "Unknown", "Error", "Exception during upload: " + ex.Message);
                 }
             }
             else

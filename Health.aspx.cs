@@ -127,6 +127,85 @@ namespace DocManagement
                         lblDocxStatus.Text = "Missing / Improperly Registered";
                         lblDocxStatus.CssClass = "status-error";
                     }
+
+                    // 3. Check Extraction Service Status
+                    string serviceQuery = "SELECT status_desc FROM sys.dm_server_services WHERE servicename LIKE '%Full-text Filter Daemon Launcher%' OR servicename LIKE '%FDHost%'";
+                    try
+                    {
+                        using (SqlCommand cmd = new SqlCommand(serviceQuery, con))
+                        {
+                            using (SqlDataReader reader = cmd.ExecuteReader())
+                            {
+                                if (reader.Read())
+                                {
+                                    string status = reader["status_desc"].ToString();
+                                    if (status.Equals("Running", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        lblServiceStatus.Text = "Running";
+                                        lblServiceStatus.CssClass = "status-ok";
+                                    }
+                                    else
+                                    {
+                                        lblServiceStatus.Text = status;
+                                        lblServiceStatus.CssClass = "status-error";
+                                    }
+                                }
+                                else
+                                {
+                                    lblServiceStatus.Text = "Not Found / Unknown";
+                                    lblServiceStatus.CssClass = "status-error";
+                                }
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Fallback if DMV is not accessible
+                        lblServiceStatus.Text = "Unable to query service status (Requires VIEW SERVER STATE).";
+                        lblServiceStatus.CssClass = "status-error";
+                    }
+
+                    // 4. Temp Directory Permissions
+                    string tempPath = @"C:\TempProcessingDir";
+                    try
+                    {
+                        if (System.IO.Directory.Exists(tempPath))
+                        {
+                            var acl = System.IO.Directory.GetAccessControl(tempPath);
+                            bool hasAccess = false;
+                            foreach (System.Security.AccessControl.FileSystemAccessRule rule in acl.GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount)))
+                            {
+                                if ((rule.IdentityReference.Value.IndexOf("MSSQLFDLauncher", StringComparison.OrdinalIgnoreCase) >= 0 || 
+                                     rule.IdentityReference.Value.IndexOf("MSSQLSERVER", StringComparison.OrdinalIgnoreCase) >= 0) 
+                                     && rule.AccessControlType == System.Security.AccessControl.AccessControlType.Allow)
+                                {
+                                    hasAccess = true;
+                                    break;
+                                }
+                            }
+
+                            if (hasAccess)
+                            {
+                                lblTempDirStatus.Text = "Valid (Permissions OK)";
+                                lblTempDirStatus.CssClass = "status-ok";
+                            }
+                            else
+                            {
+                                lblTempDirStatus.Text = "Missing Permissions for FDLauncher";
+                                lblTempDirStatus.CssClass = "status-error";
+                            }
+                        }
+                        else
+                        {
+                            lblTempDirStatus.Text = "Directory Not Found";
+                            lblTempDirStatus.CssClass = "status-error";
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        lblTempDirStatus.Text = "Error verifying permissions: " + ex.Message;
+                        lblTempDirStatus.CssClass = "status-error";
+                    }
                 }
             }
             catch (Exception ex)

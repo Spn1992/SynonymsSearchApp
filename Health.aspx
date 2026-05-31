@@ -55,6 +55,12 @@
                     </tr>
                 </table>
             </div>
+
+            <div class="card">
+                <h3>Infrastructure Health</h3>
+                <p>Extraction Service (MSSQLFDLauncher): <asp:Label ID="lblServiceStatus" runat="server" Text="Checking..."></asp:Label></p>
+                <p>Temp Directory Permissions: <asp:Label ID="lblTempDirStatus" runat="server" Text="Checking..."></asp:Label></p>
+            </div>
         </div>
     </form>
 </body>
