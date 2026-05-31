@@ -45,3 +45,20 @@ KEY INDEX PK_Documents
 ON DocCatalog
 WITH CHANGE_TRACKING AUTO;
 GO
+
+-- 5. Trigger for Normalizing File Extensions
+CREATE TRIGGER trg_NormalizeFileExtension
+ON Documents
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE d
+    SET FileExtension = '.' + ltrim(rtrim(i.FileExtension))
+    FROM Documents d
+    INNER JOIN inserted i ON d.RecordId = i.RecordId
+    WHERE left(ltrim(rtrim(i.FileExtension)), 1) <> '.';
+END;
+GO
+
