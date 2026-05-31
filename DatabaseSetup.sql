@@ -1,3 +1,12 @@
+-- 0. Verify required iFilters are present
+IF NOT EXISTS (SELECT 1 FROM sys.fulltext_document_types WHERE document_type = '.pdf')
+   OR NOT EXISTS (SELECT 1 FROM sys.fulltext_document_types WHERE document_type = '.docx')
+BEGIN
+    RAISERROR ('Required Full-Text Search iFilters (.pdf, .docx) are missing on this server. Setup aborted.', 16, 1);
+    SET NOEXEC ON;
+END
+GO
+
 -- 1. Create the Database
 CREATE DATABASE DocManagementDB;
 GO
