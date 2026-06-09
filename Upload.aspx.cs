@@ -95,8 +95,16 @@ namespace DocManagement
                         }
                     }
 
-                    lblMessage.ForeColor = System.Drawing.Color.Green;
-                    lblMessage.Text = "File uploaded successfully!";
+                    if (isSearchable)
+                    {
+                        lblMessage.ForeColor = System.Drawing.Color.Green;
+                        lblMessage.Text = "File uploaded successfully!";
+                    }
+                    else
+                    {
+                        lblMessage.ForeColor = System.Drawing.Color.DarkOrange;
+                        lblMessage.Text = "File uploaded successfully! Content search is unavailable for this file type.";
+                    }
                 }
                 catch (Exception ex)
                 {
