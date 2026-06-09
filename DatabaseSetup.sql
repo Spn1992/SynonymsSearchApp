@@ -23,6 +23,11 @@ CREATE TABLE Documents
     FilePath NVARCHAR(500) NULL,
     FileExtension NVARCHAR(50) NOT NULL,
     FileData VARBINARY(MAX) NOT NULL,
+    SearchExtension AS (CASE 
+                            WHEN left(ltrim(rtrim(FileExtension)), 1) = '.' 
+                            THEN ltrim(rtrim(FileExtension))
+                            ELSE '.' + ltrim(rtrim(FileExtension))
+                        END),
     CONSTRAINT PK_Documents PRIMARY KEY CLUSTERED (RecordId)
 );
 GO
