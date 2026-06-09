@@ -32,19 +32,26 @@ CREATE TABLE Documents
 );
 GO
 
--- 3. Create a Full-Text Catalog
-CREATE FULLTEXT CATALOG DocCatalog AS DEFAULT;
-GO
+-- Check if Full-Text Search is installed
+IF SERVERPROPERTY('IsFullTextInstalled') = 1
+BEGIN
+    SET NOCOUNT ON;
 
--- 4. Create a Full-Text Index
--- The TYPE COLUMN allows the full-text engine to know how to parse the VARBINARY(MAX) data
--- (e.g., .txt, .pdf, .docx).
-CREATE FULLTEXT INDEX ON Documents
-(
-    FileName Language 1033,
-    FileData TYPE COLUMN SearchExtension Language 1033
-)
-KEY INDEX PK_Documents
-ON DocCatalog
-WITH CHANGE_TRACKING AUTO;
+    IF TRIGGER_NESTLEVEL() > 1
+        RETURN;
+
+    UPDATE d
+    SET FileExtension = LOWER(CASE 
+                            WHEN left(ltrim(rtrim(i.FileExtension)), 1) = '.' 
+                            THEN ltrim(rtrim(i.FileExtension))
+                            ELSE '.' + ltrim(rtrim(i.FileExtension))
+                        END)
+    FROM Documents d
+    INNER JOIN inserted i ON d.RecordId = i.RecordId
+    WHERE d.FileExtension <> LOWER(CASE 
+                            WHEN left(ltrim(rtrim(i.FileExtension)), 1) = '.' 
+                            THEN ltrim(rtrim(i.FileExtension))
+                            ELSE '.' + ltrim(rtrim(i.FileExtension))
+                        END);
+END;
 GO
