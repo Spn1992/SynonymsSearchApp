@@ -1,9 +1,11 @@
--- 0. Verify required iFilters are present
+-- 0. Check for Required iFilters
+SET XACT_ABORT ON;
+GO
+
 IF NOT EXISTS (SELECT 1 FROM sys.fulltext_document_types WHERE document_type = '.pdf')
    OR NOT EXISTS (SELECT 1 FROM sys.fulltext_document_types WHERE document_type = '.docx')
 BEGIN
-    RAISERROR ('Required Full-Text Search iFilters (.pdf, .docx) are missing on this server. Setup aborted.', 16, 1);
-    SET NOEXEC ON;
+    THROW 50000, 'Required iFilters (.pdf, .docx) are missing. Please install them before proceeding.', 1;
 END
 GO
 
