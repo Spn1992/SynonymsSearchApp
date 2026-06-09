@@ -1,32 +1,20 @@
-# Document Management System Setup Guide
+# Document Management Architecture
 
-## 1. Database Setup
-To set up the document management system database, execute the `DatabaseSetup.sql` script on your SQL Server instance. This script requires sysadmin or serveradmin permissions as it performs instance-level configurations.
+## Overview
+The Document Management system provides functionality for uploading, indexing, and searching documents. It relies on SQL Server's Full-Text Search capabilities to enable content-based retrieval (e.g., searching within the body of a PDF or Word document).
 
-## 2. Full-Text Search Configuration
-In order to search for text within uploaded documents (like PDFs), Full-Text Search must be configured to load OS resources (filters) which allow reading binary data. The `DatabaseSetup.sql` script automatically enables the `load_os_resources` setting using `sp_fulltext_service`.
+## Service-Oriented Document Handling Architecture
+As part of the Metadata Standardization initiative, document metadata processing has been transitioned to a service-oriented architecture:
 
-### For Existing Installations (Retroactive Fix)
-If your system is already installed and file content search is not working, you can manually enable this configuration by executing the following SQL command with sysadmin permissions:
-```sql
-EXEC sp_fulltext_service 'load_os_resources', 1;
-```
+### 1. Metadata Service (`DocMetadata.MetadataService`)
+A dedicated, centralized service (`DocMetadata` library) handles metadata extraction and standardization. 
+- It ensures that file extensions are correctly formatted (always retaining the leading dot, e.g., `.pdf` instead of `pdf`).
+- Centralizing this logic provides automated test coverage (`DocMetadata.Tests`), protecting the pipeline against future regressions where extensions might be stripped.
+- Ensures SQL Server's Full-Text indexing `TYPE COLUMN` behaves correctly, as it natively requires the leading dot to identify the proper iFilter for extracting binary document contents.
 
-### Service Restart Required
-**IMPORTANT:** After running the database setup script, you must restart the **SQL Full-text Filter Daemon Launcher** service on your SQL Server for the changes to take effect. If you do not restart this service, document content will not be searchable.
+### 2. Validation
+Document binary signature validation is strictly tied to the corrected metadata format to ensure consistency and prevent upload of malformed files or unsupported document types.
 
-To restart the service:
-1. Open SQL Server Configuration Manager.
-2. Select "SQL Server Services".
-3. Right-click on "SQL Full-text Filter Daemon Launcher (<InstanceName>)" and select **Restart**.
-   *(Alternatively, this can be done via Windows Services (services.msc)).*
-
-### Manual Verification
-After restarting the service, you can run the following SQL query to confirm that the indexing service is correctly configured and that OS resources (such as the PDF filter) are actively loaded:
-
-```sql
-SELECT document_type, path, version, manufacturer 
-FROM sys.fulltext_document_types 
-WHERE document_type = '.pdf';
-```
-If the query returns a row for `.pdf`, the service is correctly configured and the filter daemon has successfully loaded the OS resources.
+## Database
+- **Indexing:** The `Documents` table relies on the standard extension format (`.pdf`, `.docx`, etc.) for the Full-Text Index `TYPE COLUMN`.
+- **Migration:** A `DataCorrection.sql` script is provided for standardizing legacy records. It includes a built-in migration report indicating how many records were updated.

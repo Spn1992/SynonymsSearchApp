@@ -61,6 +61,12 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="DocMetadata\DocMetadata.csproj">
+      <Project>{A1B2C3D4-E5F6-7890-1234-567890ABCDEF}</Project>
+      <Name>DocMetadata</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="Default.aspx" />
     <Content Include="Upload.aspx" />
     <Content Include="Web.config" />
